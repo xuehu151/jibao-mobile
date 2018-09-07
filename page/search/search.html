@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <link rel="stylesheet" href="../../js/plugin/mscroll/mescroll.min.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body class="search-body-pic">
+    <div class="wrap" id="seWrap">
+        <section class="search-wrap">
+            <div class="types-wrap" id="typeSe">
+                <div class="search-type" v-cloak>
+                    <input style="display: none;" v-model="searchData.title_id" type="text">
+                    {{type}}
+                </div>
+            </div>
+            <div class="search-pic-tip">
+            </div>
+            <div class="serach-input-wrap">
+                <form action="javascript:return true;">
+                    <!--<input type="search" class="search-input" oninput="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" onpaste="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" oncontextmenu ="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" maxlength="16" v-model="searchData.title_content" id="keyword" placeholder="请输入关键词">-->
+                    <input type="search" class="search-input" maxlength="16" v-model="searchData.title_content" id="keyword" placeholder="请输入中英文或数字">
+                </form>
+            </div>
+            <div class="search-cancel-wrap">
+                <input type="button" class="btn-search-cancel" id="cancel-se" value="取消">
+            </div>
+            <ul class="se-type-list" id="seTpyeList">
+                <li class="seTypeItem active-type"><a data-relval="" href="javascript:void(0)">全部分类</a></li>
+                <li v-for="item in tuijianArray" class="seTypeItem"><a :data-relval="item.uuid" href="javascript:void(0)">{{item.name}}</a></li>
+            </ul>
+        </section>
+        <div class="search-empty-wrap" id="seHWrap">
+            <div v-if="login">
+                <p class="search-history-tip">
+                    搜索历史
+                </p>
+                <div class="search-key-wrap"  v-cloak>
+                    <div v-for="item in searchHistory" class="search-key">
+                        {{item}}
+                    </div>
+                </div>
+                <a v-if="searchHistory.length!=0" class="search-reset" href="javascript:void(0)" id="search-reset">
+                    清除历史记录
+                </a>
+            </div>
+            <div v-if="!login" class="search-login-tip"  v-cloak>
+                <div class="search-login-txt">
+                    暂无搜索历史，建议您先
+                </div>
+                <input type="button" class="search-login-btn" id="toLogin">
+            </div>
+        </div>
+        <div class="search-news-list" id="seNewList" style="display: none;">
+            <section class="news-list newslist-insearch" id="news-list">
+                <ul v-if="news.length" class="news">
+                    <li v-for="dataitem in news" class="new-item"  v-cloak>
+                        <div class="new-pic-wrap">
+                            <a class="new-pic-href" :href="'../newdetail/newdetail.html?url2=comesearch&atid='+dataitem.uuid">
+                                <img class="new-pic" :src="dataitem.thumbnailImage" alt="">
+                            </a>
+                        </div>
+                        <section class="new-title-wrap">
+                            <a class="new-title">
+                                {{dataitem.title}}
+                            </a>
+                            <p class="new-time">
+                                {{dataitem.tagName}} / {{dataitem.createTime.split(' ')[0]}}
+                            </p>
+                        </section>
+                    </li>
+                </ul>
+                <p class="nodata-tip" v-cloak v-if="!news.length">无搜索结果</p>
+               <!-- <div class="line-solid-divide"></div>
+                <button class="pull-load"><img src="../../img/ic_refresh.png" alt="">下拉加载更多</button>-->
+            </section>
+
+        </div>
+        <div class="fixedPlaceholder">
+        </div>
+    </div>
+</body>
+<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/mscroll/mescroll.min.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+    $(function(){
+
+        var userid = sessionStorage.getItem('uuid');
+        var mescroll;
+
+        var vm = new Vue({
+            el:'#seWrap',
+            data:{
+                tuijianArray:[],
+                searchData:{themeUuid:"",title_content:''},
+                login:false,
+                searchHistory:[],
+                type:'全部分类',
+                news:[],
+                newAll:[],
+                pageSize:10
+            }
+        });
+
+        //类型数据
+        $.ajax({
+            url:jb.apiurl+'content/getAllTheme',
+            type:"post",
+            dataType:"json",
+            success:function(data){
+//                console.log(data)
+                if(data.code == 1)
+                {
+                    vm.tuijianArray = data.object;
+                }
+            }
+        });
+
+        //登录状态
+        if(sessionStorage.getItem('login'))
+        {
+            vm.login = true;
+        }
+
+        //生成搜索历史，没登录时是null
+        if(sessionStorage.getItem('searchHistory') != null)
+        {
+            //没搜索历史时，初始"null"
+            if(sessionStorage.getItem('searchHistory') == "" || sessionStorage.getItem('searchHistory') == 'null')
+            {
+                vm.searchHistory = [];
+            }
+            else
+            {
+                vm.searchHistory = sessionStorage.getItem('searchHistory').split(',');
+            }
+        }
+
+        //去登陆
+        $(document).on('click','#toLogin',function(){
+            location.href = '../userform/login.html?url='+encodeURIComponent(location.href);
+        });
+
+        //防止背景图移位
+        $('body').height($(window).height());
+
+        //触发搜索
+        $("#keyword").on('keypress',function(e) {
+            var keycode = e.keyCode;
+            var searchName = $.trim($(this).val());
+            if(keycode=='13' && searchName !== '') {
+                e.preventDefault();
+                toSearch();
+            }
+        });
+
+        function toSearch()
+        {
+            vm.news = [];
+            $('#seNewList').show();
+            $('#seHWrap').hide();
+            if(typeof mescroll == 'undefined')
+            {
+                mescroll = new MeScroll("news-list", {
+                    down: {
+                        auto: false,
+                        isLock:true
+                    },
+                    up: {
+                        auto: false,
+                        isBounce: false,
+                        offset:0,
+                        noMoreSize:1,
+                        page:{
+                            num : 0 ,
+                            size : vm.pageSize,
+                            time : null
+                        },
+                        htmlLoading:'<p class="upwarp-progress mescroll-rotate"></p><p class="upwarp-tip">加载中...</p>',
+                        htmlNodata:'<p class="upwarp-nodata">没有更多了</p>',
+                        callback: function(page){
+                            var pageTo = page.num - 1;
+                            function scal(pageStaus){
+                                console.log(pageStaus.hasnext)
+                                mescroll.endSuccess(pageStaus.curnum,pageStaus.hasnext);
+                            }
+                            getSearchData(pageTo,scal);
+                        }
+                    }
+                });
+            }
+            mescroll.resetUpScroll();
+        }
+
+        //search history 处理
+        function saveSearchHistory(historyStr)
+        {
+            $.ajax({
+                url:jb.apiurl+'user/saveSearchHistory',
+                data:{searchHistory:historyStr,userUuid:userid},
+                dataType:'json',
+                type:'post',
+                success:function(data){
+                    console.log(data)
+                    if(data.code === 1)
+                    {
+
+                    }
+                }
+            });
+        }
+
+        function getSearchData(pagenum,successCal)
+        {
+            vm.searchData.title_content = vm.searchData.title_content.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'');
+//            alert(keyword)
+            if(vm.searchData.title_content != '')
+            {
+                $.ajax({
+                    url:jb.apiurl+'content/searchContent',
+                    data:{themeUuid:vm.searchData.themeUuid,title:vm.searchData.title_content,nextPage:pagenum,pageSize:vm.pageSize},
+                    dataType:'json',
+                    type:'post',
+                    success:function(data){
+                                            console.log(data)
+                        var serviceUrl = data.map.url;
+                        if(data.code === 1)
+                        {
+                            if(vm.login)
+                            {
+                                if($.inArray(vm.searchData.title_content,vm.searchHistory) == -1)
+                                {
+                                    if(vm.searchHistory.length >= 9)
+                                    {
+                                        vm.searchHistory.splice(-1,1);
+                                    }
+                                    vm.searchHistory.unshift(vm.searchData.title_content);
+                                    var history = vm.searchHistory.join();
+                                    sessionStorage.setItem('searchHistory',history);
+                                    saveSearchHistory(history);
+                                }
+                            }
+                            var datas = data.object.content;
+
+                            $.each(datas,function(key,val){
+                                val.thumbnailImage = serviceUrl+val.thumbnailImage;
+                            });
+
+                            //给tuijianNewsModel赋值
+                            var tabsDataArr = $.extend([],vm.news);
+
+                            vm.news = tabsDataArr.concat(datas);
+
+                            if(typeof successCal != 'undefined')
+                            {
+                                successCal({hasnext:!data.object.last,curnum:data.object.numberOfElements});
+                            }
+                        }
+
+                    }
+                });
+            }
+            else
+            {
+                $.alert('请输入中英文或数字，且不能为空');
+            }
+        }
+
+        //清空搜索历史
+        $(document).on('click','#search-reset',function(){
+            vm.searchHistory = [];
+            sessionStorage.setItem('searchHistory','');
+            saveSearchHistory('')
+        });
+
+        //返回上一页
+        $(document).on('click','#cancel-se',function(){
+            /*var pramas = jb.GetRequest()
+            var comePage = pramas['url'];
+            var backpage = pramas['backpage'];
+            alert(backpage)
+            var backtoPage = '';
+            switch (comePage){
+                case 'comeindex':
+                    backtoPage = '../index/index.html';
+                    break;
+                case 'comeNewDetail':
+                    backtoPage = backpage;
+                    break;
+                default:
+                    backtoPage = '../index/index.html';
+                    break;
+            }
+            location.href = backtoPage;*/
+//            location.href = document.referrer;
+
+
+
+            /*var pramas = jb.GetRequest();
+            var comePage = pramas['url'];
+            if(comePage == 'undefined')
+            {
+                location.href = '../index/index.html';
+            }
+            else
+            {
+                history.back();
+            }*/
+
+            location.href = '../index/index.html';
+        });
+
+
+
+        // 类型下拉列表相关
+        $('#typeSe').click(function(e){
+            e.stopPropagation();
+            if($('.search-type',this).hasClass('search-type-showlist'))
+            {
+                $('.search-type',this).removeClass('search-type-showlist');
+                $('#seTpyeList').hide();
+            }
+            else
+            {
+                $('.search-type',this).addClass('search-type-showlist');
+                $('#seTpyeList').show();
+            }
+        });
+        $(document).on('click','.seTypeItem',function(e){
+            e.stopPropagation();
+            var thisid = $('a',this).data('relval');
+            vm.searchData.themeUuid = thisid;
+            vm.type = $('a',this).text();
+            $(this).addClass('active-type').siblings().removeClass('active-type');
+            $('.search-type').removeClass('search-type-showlist');
+            $('#seTpyeList').hide();
+        });
+        $(document).on('click',function(e){
+            $('.search-type').removeClass('search-type-showlist');
+            $('#seTpyeList').hide();
+        });
+
+        $(document).on('click.search','.search-key',function(){
+            vm.searchData.title_content = $.trim($(this).text());
+            toSearch();
+        })
+    });
+</script>
+</html>
+
+
+

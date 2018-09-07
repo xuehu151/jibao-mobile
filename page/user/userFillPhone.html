@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <link rel="stylesheet" href="../../js/plugin/swiper/swiper.min.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body class="login-status">
+<div class="wrap">
+    <div class="go-back-wrap go-back-wrap-title">
+        <div class="go-back">
+        </div>
+        <div class="page-title">
+            完善手机号
+        </div>
+    </div>
+    <div class="user-form-wrap mt160">
+        <div class="user-input-wrap mt40">
+            <input type="text" placeholder="请输入您的手机号" class="user-form-input phone_res">
+        </div>
+        <div class="user-input-wrap mt40">
+            <input type="text" maxlength="6" placeholder="请输入验证码" class="user-form-input" id='vf_code_id'>
+            <a class="form-txt-btn form-yanzheng" id="vf_id" >发送验证码</a>
+            <div class="form-yanzheng-tip form-yanzheng" id="vfcss_id" style="display: none;">60S后重新发送</div>
+        </div>
+        <div class="user-form-item mt60">
+            <input type="button" class="form-btn-common" id="btn-common" value="完成">
+        </div>
+        <!--<div class="form-txt-btn-wrap mt110">
+            <a class="form-txt-btn">
+                邮箱找回密码
+            </a>
+        </div>-->
+    </div>
+</div>
+	</body>
+	<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+	<script src="../../js/lib/vue.min.js"></script>
+	<script src="../../js/lib/underscore.js"></script>
+	<script src="../../js/lib/fastclick.js"></script>
+	<script src="../../js/plugin/swiper/swiper.min.js"></script>
+	<script src="../../js/plugin/iscroll/iscroll.js"></script>
+	<script src="../../js/plugin/tab/jquery.tab.js"></script>
+    <script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+	<script src="../../js/common/common.js"></script>
+	<script>
+		$(function(){
+			$('#btn-common').on('click',function(){
+				var code = $('#vf_code_id').val();
+				var phone = $('.phone_res').val();
+				var userUuid = sessionStorage.getItem('uuid');
+				if(phone==null || phone == ''){
+					$.alert('请输入手机号');
+				}else if(code == null || code==''){
+					$.alert('请输入验证码');
+				}else{
+//					sessionStorage.setItem('mobile',phone);
+//					window.location.href = '../user/user.html'
+					var dataParm = {
+						acc: phone,
+						userUuid :userUuid,
+						code:code
+					}
+					bindPhoneRequest(dataParm);
+				}
+			});
+			
+			//发送验证码
+			$('#vf_id').on('click',function(){
+				var phone = $('.phone_res').val();
+				if(phone==''||phone==null){
+					$.alert('请输入手机号');
+				}else{
+                    $.ajax({
+                        dataType:'json',
+                        type:'post',
+                        url:jb.apiurl+'user/getValidate',
+                        success:function(data){
+                            if(data.code == 1)
+                            {
+                                var dataParm = {
+                                    regType:"1",
+                                    registerId:phone,
+                                    timestamp:data.object.timestamp,
+                                    effective:data.object.effective
+                                };
+                                getRegisterCode(dataParm);
+                            }
+                            else
+                            {
+                                $.alert(data.message);
+                            }
+                        }
+                    });
+
+				}
+			});
+			
+			function getRegisterCode(dataParm){
+				$.ajax({
+					type:"post",
+					url:jb.apiurl + "user/getRegisterCode",
+					data: dataParm,
+					dataType:"json",
+					success:function(data){
+						console.log(data);
+        					var code = data.code;
+                			var message = data.message;
+                			if(code == 1){
+                    			$.alert('验证码已发送，请查收！');
+                                $('#vfcss_id').show();
+                                var $this = $('#vf_id');
+                                $this.hide();
+                                var cishu = 60;
+                                daojishi = setInterval(function () {
+                                    cishu--;
+                                    if (cishu == 0) {
+                                        clearInterval(daojishi);
+                                        $('#vfcss_id').hide();
+                                        $this.show();
+                                        $('#vfcss_id').text('60S后重新发送');
+                                    }
+                                    else {
+                                        $('#vfcss_id').text(cishu + 'S后重新发送');
+                                    }
+                                }, 1000);
+                			}else{
+                    			$.alert(message);
+                			}
+					}
+				});
+			}
+			
+			function bindPhoneRequest(dataParm){
+				$.ajax({
+					type:"post",
+					url: jb.apiurl + "user/bindEMailOrMobile",
+					data:dataParm,
+					dataType:"json",
+					success:function(data){
+						console.log(data);
+						var code = data.code;
+						var message = data.message;
+						$.alert(message);
+						if (code == 1) {
+//							sessionStorage.setItem('email',dataParm.acc);
+							sessionStorage.setItem('mobile',dataParm.acc);
+							window.location.href = '../user/user.html';
+						}
+					}
+				});
+			}
+		});
+	</script>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>思创吉宝</title>
+    <style>
+        html,body
+        {
+            margin: 0;
+            padding: 0;
+            word-wrap: break-word;
+            word-break: break-all;
+            overflow: visible;
+            width: 100%;
+        }
+        img
+        {
+            display: block;
+        }
+        p{
+            padding: auto 0;
+            margin: auto 0;
+            overflow: hidden;
+        }
+        /*body *{
+            -webkit-text-size-adjust: 300%;
+        }*/
+        /*strong,p
+        {
+            display: block;
+            margin: 0;
+            padding: 0;
+        }*/
+        body{
+            transform-origin: 0 0;
+        }
+    </style>
+</head>
+<body>
+</body>
+<script src="../../js/lib/jquery.min.js"></script>
+<!--<script src="../../js/common/common.js"></script>-->
+<script>
+    (function(){
+        var pixclPatio = 1 / window.devicePixelRatio;
+//        alert(window.screen.availWidth/document.body.clientWidth)
+//        alert(window.devicePixelRatio)
+        $('body').css({width:(pixclPatio*100)+'vw',height:(pixclPatio*100-0.3)+'vh',transform: 'scale('+window.devicePixelRatio+')'});
+
+    })();
+/*    $(function(){
+
+        var pramas = jb.GetRequest();
+        var newsid = pramas['newsid'];
+        var publish = pramas['publish'];
+//        var time = pramas['time'];
+//        alert(time)
+
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            url:jb.apiurl+'content/getInfoContentByUuid',
+            data:{contentUuid:newsid,publish:publish},
+            global:false,
+            success:function(data) {
+                if(data.code == 1)
+                {
+                    var $domObj = $(data.object.content);
+//                    $('body').html($domObj).find('p:first-child').remove();
+                    $('body').html($domObj);
+                    setInterval(function(){
+                        if(typeof top.setIframeHeight != 'undefined')
+                        {
+                            top.setIframeHeight('newsDetailFrame');
+                        }
+                    },600);
+
+                    var $pics = $domObj.find('img');
+                    var len = $domObj.find('img').length;
+                    var j = 0;
+                    $pics.each(function (index) {
+
+                        //实例化Image对象
+                        var imgObj = new Image();
+
+                        $(imgObj).on('load error', function () {
+
+                            j++;
+                            if( j === len )
+                            {
+                                top.$.hideLoading('iframe-load-tip');
+                                setTimeout(function(){
+//                                    top.$.hideLoading('iframe-load-tip');
+                                    top.commentLoad();
+                                },600);
+                            }
+                        });
+                        //给图片赋值路径
+                        imgObj.src = $(this).attr('src');
+
+                    });
+
+
+//                    setTimeout(function(){
+//                        top.setIframeHeight('newsDetailFrame');
+//                    },2000)
+
+                }
+            }
+        });
+    });*/
+</script>
+</html>
+
+
+

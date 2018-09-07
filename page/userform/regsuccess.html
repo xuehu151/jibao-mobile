@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <link rel="stylesheet" href="../../js/plugin/swiper/swiper.min.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body class="login-status">
+    <div id="user-edit-area" class="wrap">
+        <div class="user-form-wrap">
+            <div class="reg-success-pic">
+            </div>
+            <div class="reg-success-txt">
+                恭喜您，注册成功
+            </div>
+            <div class="paizhao-wrap" id='touxiang_id'>
+                <div  id="previewTx" class="paizhao-wrap-pic">
+                    <!--<img id="tx-pic-edit" src="../../img/demo/default-tx.png" class="tx-pic-edit">-->
+                    	<img id="tx-pic-edit" src="../../img/btn_userphoto.png" class="tx-pic-edit">
+                </div>
+                <input id="file" class="tx-file" type="file" accept="image/*" multiple  />
+            </div>
+            <div class="user-input-wrap mt40">
+                <input id='text_id' type="text" maxlength="20" placeholder="请输入用户名" class="user-form-input">
+            </div>
+            <div class="form-input-tip mt20">
+                名称最长不可超过10个字符
+            </div> 
+            <div class="user-form-item mt60">
+                <input type="button" id="okBtn" class="form-btn-common" value="完成">
+            </div>
+            <div class="form-txt-btn-wrap  mt110">
+                <a href="javascript:void(0)" id="ignore" class="form-txt-btn">
+                    跳过
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="wrap" id="clip-area" style="display: none;">
+        <div class="pic-select">
+            <div id="pic-preview-wrap" class="pic-preview-wrap"></div>
+            <div class="selectpic-btn-wrap">
+                <div id="cancel-pic" class="cancel-pic">取消</div>
+                <div id="clipBtn" class="ok-pic">确定</div>
+            </div>
+            <img id="oldpic" class="holder-pic" src="" alt="">
+        </div>
+    </div>
+</body>
+<script src="../../js/lib/jquery.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/swiper/swiper.min.js"></script>
+<script src="../../js/plugin/iscroll/iscroll.js"></script>
+<script src="../../js/plugin/tab/jquery.tab.js"></script>
+
+<script src="../../js/lib/iscroll-zoom.js"></script>
+<script src="../../js/lib/hammer.js"></script>
+<script src="../../js/lib/exif.js"></script>
+<script src="../../js/lib/jquery.photoClip.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+    $(function(){
+        var fileUrl = '';
+        var showimg = '';
+        var dataImgBase = '';
+        $('#text_id').val(sessionStorage.getItem('nickName'));
+
+        $('#ignore').on('click', function () {
+            sessionStorage.setItem('login', true);
+            window.location.href = '../index/index.html'
+        })
+
+        $('#okBtn').on('click', function () {
+            var username =  $.trim($('#text_id').val());
+
+            var regu = "^[0-9a-zA-Z\u4e00-\u9fa5]{4,20}$";
+            var re = new RegExp(regu);
+            if(!re.test(username))
+            {
+                $.alert("必须是4~20位汉字或字母或数字");
+            }
+            else
+            {
+                //                if(fileUrl == '')
+                //                {
+                //                    fileUrl = sessionStorage.getItem('fileUrl');
+                //                }
+                if(showimg == '')
+                {
+                    showimg = sessionStorage.getItem('icon');
+                }
+                $.ajax({
+                    type:'post',
+                    dataType:'json',
+                    url:jb.apiurl+'user/modifyIconWithNickName',
+                    data:{nickName:username,icon:fileUrl,userUuid:sessionStorage.getItem('uuid')},
+                    success:function(data){
+                        console.log(data)
+                        if(data.code == 1)
+                        {
+                            //                            alert(username)
+                            sessionStorage.setItem('nickName',username);
+                            sessionStorage.setItem('icon',showimg);
+                            $.alert('修改信息成功',function(){
+                                location.href = '../index/index.html';
+                            });
+                        }
+                        else
+                        {
+                            $.alert(data.message);
+                        }
+                        //                        location.href = '../index/index.html'
+                    }
+                });
+            }
+
+        })
+
+        var htmlFs = parseInt($('html').css('fontSize'));
+        var preWidth = htmlFs*(600/40);
+        var preHeight = htmlFs*(600/40);
+        $("#pic-preview-wrap").photoClip({
+            width: preWidth,
+            height: preHeight,
+            file: "#file",
+            view: "#previewTx",
+            ok: "#clipBtn",
+            clipFinish: function(dataURL) {
+                $('#oldpic').attr('src',dataURL);
+                $('#oldpic')[0].onload = function () {
+                    $('#user-edit-area').show();
+                    $('#clip-area').hide();
+                    dataImgBase = dataURL;
+                }
+            }
+        });
+
+        function convertBase64UrlToFile(urlData){
+
+            //去掉url的头，并转换为byte
+            var bytes=window.atob(urlData.split(',')[1]);
+
+            //处理异常,将ascii码小于0的转换为大于0
+            var ab = new ArrayBuffer(bytes.length);
+            var ia = new Uint8Array(ab);
+            for (var i = 0; i < bytes.length; i++) {
+                ia[i] = bytes.charCodeAt(i);
+            }
+
+            return new File( [ab] ,'a.png', {type : 'image/jpg'});
+        }
+
+        function getBlobBydataURI(dataURI,type) {
+            var binary = atob(dataURI.split(',')[1]);
+            var array = [];
+            for(var i = 0; i < binary.length; i++) {
+                array.push(binary.charCodeAt(i));
+            }
+            return new Blob([new Uint8Array(array)], {type:type });
+        }
+
+        $("#clipBtn").click(function(){
+            $('#previewTx').empty().append('<img src="' + imgsource + '" align="absmiddle" class="tx-pic-edit">');
+            var $Blob= getBlobBydataURI(imgsource,'image/png');
+            var formData = new FormData();
+            formData.append("photoFile", $Blob ,"file_"+Date.parse(new Date())+".png");
+            uploadImg(formData);
+        });
+
+        function uploadImg(formData)
+        {
+            $.ajax({
+                type:'post',
+                dataType:'json',
+                url:jb.apiurl+'user/uploadFile',
+                data:formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success:function(data){
+                    console.log(data);
+                    if(data.code == 1)
+                    {
+                        fileUrl = data.object.saveImage;
+                        showimg = data.object.showImage;
+                        sessionStorage.setItem('fileUrl',fileUrl);
+                    }
+                }
+            });
+        }
+
+        $('#cancel-pic').click(function(){
+            $('#user-edit-area').show();
+            $('#clip-area').hide();
+        });
+
+        $('#file').change(function(){
+            $('#user-edit-area').hide();
+            $('#clip-area').show();
+
+            var preview,
+                    img_txt,
+                    localImag,
+                    file_head = document.getElementById("file_head"),
+                    picture = file_head.value;
+
+            if (!picture.match(/.jpg|.gif|.png|.bmp/i))
+            {
+                $.alert("您上传的图片格式不正确，请重新选择！");
+                return false;
+            }
+            if ( preview = document.getElementById("preview"), file_head.files && file_head.files[0])
+            {
+                preview.style.display = "block",
+                        preview.style.width = "63px",
+                        preview.style.height = "63px",
+                        preview.src = window.navigator.userAgent.indexOf("Chrome") >= 1 || window.navigator.userAgent.indexOf("Safari") >= 1 ? window.webkitURL.createObjectURL(file_head.files[0]) : window.URL.createObjectURL(file_head.files[0]);
+            }
+            else {
+                file_head.select(),
+                        file_head.blur(),
+                        img_txt = document.selection.createRange().text,
+                        localImag = document.getElementById("localImag"),
+                        localImag.style.width = "63px",
+                        localImag.style.height = "63px";
+                try {
+                    localImag.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)",
+                            localImag.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = img_txt;
+                } catch(f) {
+                    $.alert("您上传的图片格式不正确，请重新选择！");
+                    return false;
+                }
+                preview.style.display = "none",
+                        document.selection.empty();
+            }
+        });
+    });
+</script>
+</html>
+
+
+

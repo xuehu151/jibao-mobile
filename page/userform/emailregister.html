@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <link rel="stylesheet" href="../../js/plugin/swiper/swiper.min.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body class="login-status">
+<div class="wrap">
+    <div class="go-back-wrap go-back-wrap-title">
+        <div class="go-back">
+        </div>
+        <div class="page-title">
+            注册吉宝账号
+        </div>
+    </div>
+    <div class="user-form-wrap mt160">
+        <div class="form-txt-tip mt15">
+            注册即代表阅读并同意<a class="stress-txt">吉宝条款</a>
+        </div>
+        <div class="user-input-wrap mt40">
+            <input type="text" placeholder="请输入您的邮箱" class="user-form-input email_reg">
+        </div>
+        <div class="user-input-wrap mt40">
+            <input type="password" maxlength="20" placeholder="请输入您的登录密码" class="user-form-input email_password">
+        </div>
+        <div class="user-input-wrap mt40">
+            <input type="tel" maxlength="6" placeholder="请输入验证码" class="user-form-input code_reg">
+            <a class="form-txt-btn form-yanzheng" id='vf_id'>发送邮箱验证码</a>
+            <div class="form-yanzheng-tip form-yanzheng" style="display: none;" id='vfcss_id'>60S后重新发送</div>
+        </div>
+        <div class="user-form-item mt60">
+            <input type="button" class="form-btn-common" id='email_register_id' value="注册">
+        </div>
+        <div class="form-txt-btn-wrap mt110">
+            <a class="form-txt-btn" id="toPhoneReg" href="javascript:void(0)">
+                使用手机注册
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="user-agreement-bg" id="user-agreement"style="display: none;">
+    <div class="user-agreement-content-wrap">
+        <div class="user-agreement-content" id="user-agreement-content">
+        </div>
+        <div class="user-agreement-close" id="agreement-close">
+            <img src="../../img/ic_agreement_close.png" class="close-img"/>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/swiper/swiper.min.js"></script>
+<script src="../../js/plugin/iscroll/iscroll.js"></script>
+<script src="../../js/plugin/tab/jquery.tab.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+    $(function(){
+        var daojishi;
+    		$('#user-agreement').hide();
+            $('#user-agreement-content').html(jb.registerContent);
+    		
+    		$('.stress-txt').click(function(){
+    			$('#user-agreement').show();
+    		});
+    		
+    		$('#agreement-close').click(function(){
+    			$('#user-agreement').hide();
+    		});
+
+        $('#vf_id').on('click', function () {
+            var emailtext = $('.email_reg').val();
+            if (emailtext == '') {
+                $.alert('请输入邮箱地址')
+            }else {
+                $.ajax({
+                    dataType:'json',
+                    type:'post',
+                    url:jb.apiurl+'user/getValidate',
+                    success:function(data){
+                        if(data.code == 1)
+                        {
+                            var dataParm = {
+                                regType:"1",
+                                registerId:emailtext,
+                                timestamp:data.object.timestamp,
+                                effective:data.object.effective
+                            };
+                            getRegisterCode(dataParm);
+                        }
+                        else
+                        {
+                            $.alert(data.message);
+                        }
+                    }
+                });
+
+            }
+        });
+
+        $('#toPhoneReg').on('click', function () {
+            window.location.href = 'phoneregister.html'
+        });
+
+        $('#email_register_id').on('click', function () {
+
+            var emailname = $('.email_reg').val();
+            var emailpassword = $('.email_password').val();
+            var code_reg = $('.code_reg').val();
+            if (emailname == "") {
+                $.alert("请输入邮箱")
+            }else if (emailpassword == "") {
+                $.alert('请输入密码')
+            }else if (code_reg == "") {
+                $.alert('请输入验证码');
+            }else {
+                var regu = "^(?=.*[0-9])(?=.*[a-zA-Z])(.{8,12})$";
+                var re = new RegExp(regu);
+                if(re.test(emailpassword))
+                {
+                    var dataObj = {
+                        registerType: "MAIL",
+                        registerId: emailname,
+                        passwd: emailpassword,
+                        code: code_reg
+                    };
+
+                    registerRequest(dataObj);
+                }
+                else
+                {
+                    $.alert("密码必须是8~12位字母+数字")
+                }
+            }
+        });
+		
+		//邮箱注册
+        function registerRequest(dataParm) {
+            $.ajax({
+                url: jb.apiurl + 'user/register',
+                type: "post",
+                dataType: "json",
+                data: dataParm,
+                success: function (data) {
+                    console.log(data);
+                    var code = data.code;
+                    var message = data.message;
+                    if(code == 1){
+                        var userIcon = data.object.icon;
+                        var nickName = data.object.nickName;
+                        if (userIcon == null) {
+                            userIcon = '../../img/demo/default-tx.png';
+                        }
+                        if (nickName == null) {
+                            nickName = 'keppel';
+                        }
+
+						sessionStorage.setItem('icon',userIcon);
+                        sessionStorage.setItem('uuid',data.object.uuid);
+                        sessionStorage.setItem('searchHistory',data.object.searchHistory);
+                        sessionStorage.setItem('nickName',nickName);
+                        sessionStorage.setItem('login',true);
+                        
+                        sessionStorage.setItem('mobile',data.object.mobile);
+                        if (data.object.mobile == null) {
+                            sessionStorage.setItem('mobile','');
+                        }
+                        sessionStorage.setItem('email',data.object.email);
+                        if (data.object.email == null) {
+                            sessionStorage.setItem('email','');
+                        }
+                        $.alert('注册成功',function(){
+                            location.href = 'regsuccess.html';
+                        });
+                    }
+                    else
+                    {
+                        $.alert(message);
+                    }
+                }
+            });
+        }
+        
+       //获取邮箱验证码
+       function getRegisterCode(dataParm){
+       	console.log(dataParm);
+       	$.ajax({
+       		type:"post",
+       		url:jb.apiurl + "user/getRegisterCode",
+       		data:dataParm,
+       		dataType:"json",
+       		success:function(data){
+       			console.log(data);
+       			var code = data.code;
+                var message = data.message;
+                if(code == 1){
+                    $.alert('验证码已发送，请登录邮箱查看！');
+
+                    $('#vfcss_id').show();
+                    var $this = $('#vf_id');
+                    $this.hide();
+                    var cishu = 60;
+                    daojishi = setInterval(function () {
+                        cishu--;
+                        if (cishu == 0) {
+                            clearInterval(daojishi);
+                            $('#vfcss_id').hide();
+                            $this.show();
+                            $('#vfcss_id').text('60S后重新发送');
+                        }
+                        else {
+                            $('#vfcss_id').text(cishu + 'S后重新发送');
+                        }
+                    }, 1000);
+
+                }else{
+                    $.alert(message);
+                }
+       		}
+       	});
+       }
+	   
+    });
+</script>
+</html>
+
+
+

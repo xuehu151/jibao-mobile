@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body>
+    <div class="wrap" id="content">
+        <div class="go-back-wrap go-back-wrap-tran">
+            <div class="go-back">
+            </div>
+            <!--<div class="to-search"></div>-->
+        </div>
+        <section class="news-list" id="news-list">
+            <ul class="news">
+                <li class="new-item">
+                    <div class="new-pic-wrap">
+                        <a class="new-pic-href" href="#">
+                            <img class="new-pic" :src="newsDetai.thumbnailImage" alt="">
+                        </a>
+                    </div>
+                    <section class="new-title-wrap" v-cloak>
+                        <a class="new-title">
+                            {{newsDetai.title}}
+                        </a>
+                        <p class="new-time">
+                            {{ newsDetai.createTime.split(' ')[0] }}
+                        </p>
+                    </section>
+                </li>
+            </ul>
+        </section>
+        <div class="container mt35 mb120">
+            <div class="newdetail-con" v-html="newsDetai.infoContent" v-cloak>
+            </div>
+            <!--<div class="newdetail-con" v-cloak>
+                {{newsDetai.content}}
+            </div>
+            <div class="newdetail-pic">
+                <img :src="newsDetai.contentimg" alt="">
+            </div>-->
+            <textarea name="" id="newDetailVal" style="display: none;" cols="30" rows="10" >{{newsDetai.infoContent}}</textarea>
+        </div>
+        <div class="detail-bottombtn-wrap">
+            <buttton class="detail-bottom-loginbtn" id="applyBtn" v-cloak v-if="!applied">
+                <a href="javascript:void(0)">活动报名</a>
+            </buttton>
+            <buttton class="detail-bottom-loginbtn" id="appliedTip" v-cloak v-if="applied">
+                <a href="javascript:void(0)">已报名</a>
+            </buttton>
+        </div>
+    </div>
+</body>
+<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+<script src="../../js/lib/vue.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+    $(function(){
+
+        var vm = new Vue({
+            el:'#content',
+            data:{
+                newsDetai:{thumbnailImage:'',infoContent:'',createTime:'',},
+                applied:null
+            }
+        });
+
+//        vm.applied = sessionStorage.getItem('active');
+
+        var pramas = jb.GetRequest();
+        var newsid = pramas['atid'];
+        sessionStorage.setItem('activeid',newsid);
+
+
+        //获取详情数据
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            url:jb.apiurl+'act/getPublishAct',
+            data:{uuid:newsid},
+            success:function(data) {
+                var picUrl = data.map.url;
+                console.log('详情数据：')
+                console.log(data)
+                if (data.code == 1)
+                {
+                    vm.newsDetai = data.object;
+                    vm.newsDetai.thumbnailImage = picUrl+data.object.thumbnailImage;
+
+//                    var newDetailObj = '<div id="contentWrapnew">'+data.object.infoContent+'</div>';
+//                    $('#new-con-wrap').append($(newDetailObj).html());
+//                    $('#new-con-wrap').find('h1:first-child').remove();
+//
+//                    vm.newsDetai.content = $('#new-con-wrap').html();
+                }
+
+            }
+        });
+
+        $('.wrap').on('scroll',function(){
+            var newY = $('.news-list').offset().top;
+            if(newY < 0)
+            {
+                $('.go-back-wrap').removeClass('go-back-wrap-tran');
+            }
+            else
+            {
+                $('.go-back-wrap').addClass('go-back-wrap-tran');
+            }
+        });
+
+        vm.$nextTick(function(){
+            $('#applyBtn').on('click',function(){
+                 if(sessionStorage.getItem('login')){
+                    location.href = 'addactive.html';
+                 }else{
+                    location.href = '../userform/login.html?url='+encodeURIComponent(location.href);
+                 }
+             });
+        });
+
+        $('body').off('click.goback').on('click.goback','.go-back',function(){
+            location.href = '../index/index.html';
+        });
+
+    });
+</script>
+</html>
+
+
+

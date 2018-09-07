@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <link rel="stylesheet" href="../../js/plugin/mscroll/mescroll.min.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body>
+<div class="wrap" id="wrap">
+    <div class="content-scroll">
+        <div class="mescroll" id="content">
+            <div class="go-back-wrap go-back-wrap-tran">
+                <div class="go-back">
+                </div>
+                <div class="to-search"></div>
+            </div>
+            <section class="news-list" id="news-list">
+                <ul class="news">
+                    <li class="new-item">
+                        <div class="new-pic-wrap">
+                            <a class="new-pic-href" href="#">
+                                <img class="new-pic" :src="newsDetai.bannerImage" alt="">
+                            </a>
+                        </div>
+                        <section class="new-title-wrap" v-cloak>
+                            <a class="new-title">
+                                {{newsDetai.title}}
+                            </a>
+                            <p class="new-time">
+                                {{newsDetai.tagName}} / {{ newsDetai.createTime.split(' ')[0] }}
+                            </p>
+                        </section>
+                    </li>
+                </ul>
+            </section>
+            <div class="container mt35" id="container" style="overflow-y:scroll;min-height: 1px;overflow-x: auto">
+
+                <!--<iframe id="newsDetailFrame" style="transform: scale(3);transform-origin: 0 0 0" frameborder="0" width="100%"></iframe>-->
+                <iframe id="newsDetailFrame" frameborder="0" scrolling="no" width="100% " ></iframe>
+
+                <div class="line-dashed-divide mt35" id="yixiapinglun">
+                </div>
+                <div class="comment-hascon" v-if="newsDetai.commentList.content.length">
+                    <div class="comment-tip">
+                        评论
+                    </div>
+                    <ul class="commentlist-wrap">
+                        <li v-for="cm in newsDetai.commentList.content" class="commentlist-item">
+                            <div class="commment-userpic">
+                                <img :src="cm.icon" onerror="this.src='../../img/default-tx.png'" alt="">
+                            </div>
+                            <div class="comment-detail-wrap" v-cloak>
+                                <div class="comment-detail-user">
+                                    {{cm.nickName}}
+                                </div>
+                                <div class="comment-detail-con">
+                                    {{cm.comment}}
+                                </div>
+                                <div class="comment-time">
+                                    {{cm.commentDate.split(' ')[0]}}
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="comment-no" v-if="!newsDetai.commentList.content.length">
+                    暂无评论
+                </div>
+                <!--<div class="comment-no" v-if="!newsDetai.commentList.content.length">
+                    不可评论
+                </div>-->
+                <div class="line-solid-divide"></div>
+                <!--<button class="pull-load"><img src="../../img/ic_refresh.png" alt="">下拉加载更多</button>-->
+            </div>
+
+            <!--<div class="new-con-wrap" style="display: none;" id="new-con-wrap">
+            </div>
+
+            <textarea name="" id="newDetailVal" style="display: none;" cols="30" rows="10" >{{newsDetai.content}}</textarea>-->
+        </div>
+    </div>
+    <div v-if="newsDetai.commentOpen" class="detail-bottombtn-wrap" id="detail-loginBtn">
+        <buttton class="detail-bottom-loginbtn" id="login-btn-tip">
+            注册 / 登录后可评论内容
+        </buttton>
+    </div>
+    <div v-if="newsDetai.commentOpen" class="detail-bottominput-wrap" style="display: none;" id="detail-comment">
+        <div class="detail-bottominput-tip">
+            <input type="text" placeholder="请输入评论" maxlength="70" v-model="commentCon" class="comment-input" id="comment-input">
+        </div>
+        <div v-cloak class="comment-fabu-wrap"  id="commentFabu" v-bind:class="{ 'comment-fabu-dis': commentCon.trim() == '' }">
+            {{btnFabutxt}}
+        </div>
+        <a style="display: none;" id="toPositionComment" href="#yixiapinglun"></a>
+    </div>
+</div>
+</body>
+<script src="../../js/lib/jquery.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/iscroll/iscroll.js"></script>
+<script src="../../js/plugin/mscroll/mescroll.min.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+
+
+    /*详情页统计*/
+    var detailedId = "";
+    var pramas = jb.GetRequest();
+    var newsid = pramas['atid'];
+    var userUuid = sessionStorage.getItem('uuid')||"";
+    var accFrom = $.getSystemInfo();
+
+    window.onbeforeunload = function(){
+        /*var i = 2;
+         $.ajax({
+         async: false,
+         type:'post',
+         dataType:'json',
+         url:jb.apiurl+'content/getInfoContentByUuid',
+         data:{contentUuid:'8a5e8acc63befa010163d3f2c4020029'},
+         success:function(){
+         while(i != 101){
+         console.log(i)
+         i++;
+         }
+         }
+         })*/
+        var dataObj = $.extend({},{accessTime:"",closeTime:jb.getNowTime(),contentUuid:newsid,detailedId:detailedId,secThemeUuid:""},accFrom);
+        $.ajax({
+            global:false,
+            async: false,
+            url:jb.apiurl+'site/siteCounterDetailed',
+            type:'post',
+            dataType:'JSON',
+            data:dataObj,
+            success:function(data){
+                console.log('success')
+                if(data.object>0)
+                {
+                    detailedId = data.object;
+                }
+            },
+            error:function(){
+                console.log('error')
+            }
+        });
+    }
+
+    $(function(){
+
+
+//        alert(jb.getNowTime());
+        var mescroll;
+
+        var vm = new Vue({
+            el:'#wrap',
+            data:{
+                newsDetai:{bannerImage:'',content:'',titleCon:'',commentOpen:1,createTime:'',tagName:'',commentList:{content:[]}},
+                commentCon:'',
+                errorimg:'this.src="../../img/default-tx.png"',
+                btnFabutxt:'发布'
+            }
+        });
+
+        $('body .wrap').height($(window).height());
+
+        var poscomment;
+
+
+
+        function setIframeHeight(id) {
+            var iframe = $('#'+id).get(0);
+            if (iframe) {
+                var iframeWin = iframe.contentWindow || iframe.contentDocument.parentWindow;
+                if (iframeWin.document.body) {
+                    iframe.height = iframeWin.document.documentElement.scrollHeight || iframeWin.document.body.scrollHeight;
+                    $('#container').css('-webkit-overflow-scrolling','auto');
+                    //                        $.alert('123')
+                    //                    $('body').prepend($('#container').css('-webkit-overflow-scrolling')+'<br>')
+                    var platform = navigator.platform;
+                    if (platform=="iPhone") {
+                        //设置iframe里面body的宽高即可解决
+//                        $('#'+id).contents().find("body").css("width",'33vw');
+                    }
+                }
+            }
+        };
+
+        window.setIframeHeight = setIframeHeight;
+
+
+        $.showLoading('iframe-load-tip');
+//        $('#newsDetailFrame').attr('src','detailTem.html?newsid='+newsid+'&publish=1'+'&time='+new Date().getTime());
+
+        function commentLoad()
+        {
+            mescroll = new MeScroll("content", {
+                down: {
+                    auto: false,
+                    isLock:true
+                },
+                up: {
+                    auto: false,
+                    isBounce: false,
+                    offset:0,
+                    noMoreSize:1,
+                    page:{
+                        num : 0 ,
+                        size : 10,
+                        time : null
+                    },
+                    htmlLoading:'<p class="upwarp-progress mescroll-rotate"></p><p class="upwarp-tip">加载中..</p>',
+                    htmlNodata:'<p class="upwarp-nodata">没有更多评论了</p>',
+                    callback: function(page){
+                        var pageTo = page.num - 1;
+                        function scal(pageStaus){
+                            mescroll.endSuccess(pageStaus.curnum,pageStaus.hasnext);
+                        }
+                        getCommentData(pageTo,scal);
+                    }
+                }
+            });
+        }
+        window.commentLoad = commentLoad;
+
+        function accessFangwen(secThemeUuid){
+            var accessTime = "";
+            //第一次访问
+            if(localStorage.getItem('newaccess') == null)
+            {
+                accessTime = jb.getNowTime();
+                //没有关于newaccess记录时，设置当前时间戳
+                localStorage.setItem('newaccess',Date.parse(new Date()));
+            }
+            else
+            {
+                //有关于newaccess的记录，对比时间是否还在当日
+                var time1 = parseInt(localStorage.getItem('newaccess'));
+                var timeNow = Date.parse(new Date());
+                //这次访问还在当天
+                if(jb.timestampToTime(time1) == jb.timestampToTime(timeNow))
+                {
+                    accessTime = "";
+                }
+                else
+                {
+                    //    访问不在当天
+                    accessTime = jb.getNowTime();
+                    localStorage.setItem('newaccess',Date.parse(new Date()));
+                }
+            }
+            var dataObj = $.extend({},{accessTime:accessTime,closeTime:"",contentUuid:newsid,detailedId:detailedId,secThemeUuid:secThemeUuid},accFrom);
+            console.log(dataObj);
+
+            $.ajax({
+                global:false,
+                url:jb.apiurl+'site/siteCounterDetailed',
+                type:'post',
+                dataType:'JSON',
+                data:dataObj,
+                success:function(data){
+                    console.log('success')
+                    console.log(data)
+                    if(data.object>0)
+                    {
+                        detailedId = data.object;
+                    }
+                },
+                error:function(){
+                    console.log('error')
+                }
+            });
+        }
+
+        //获取详情数据
+        $.ajax({
+            type:'post',
+            dataType:'json',
+            url:jb.apiurl+'content/getInfoContentByUuid',
+            data:{contentUuid:newsid},
+            success:function(data) {
+                var picUrl = data.map.url;
+                console.log('详情数据：')
+                console.log(data)
+                if (data.code == 1)
+                {
+                    data.object.commentList.content = [];
+                    vm.newsDetai = data.object;
+                    vm.newsDetai.bannerImage = picUrl+data.object.bannerImage;
+
+                    var secThemeUuid = data.object.secThemeUuid;
+
+                    accessFangwen(secThemeUuid);
+
+                    $('#newsDetailFrame').attr('src','detailTem.html');
+                    $('#newsDetailFrame').load(function(){
+                        var $domObj = $(data.object.content);
+                        $(this).contents().find('body').html($domObj);
+
+                        setInterval(function(){
+                            if(typeof setIframeHeight != 'undefined')
+                            {
+                                setIframeHeight('newsDetailFrame');
+                            }
+                        },300);
+
+                        var $pics = $domObj.find('img');
+                        var len = $domObj.find('img').length;
+                        var j = 0;
+                        $pics.each(function (index) {
+
+                            //实例化Image对象
+                            var imgObj = new Image();
+
+                            $(imgObj).on('load error', function () {
+
+                                j++;
+                                if( j === len )
+                                {
+                                    $.hideLoading('iframe-load-tip');
+                                    setTimeout(function(){
+                                        commentLoad();
+                                    },600);
+                                }
+                            });
+                            //给图片赋值路径
+                            imgObj.src = $(this).attr('src');
+
+                        });
+                    });
+                }
+
+            }
+        });
+
+        $('#content').on('scroll',function(){
+            var newY = $('#news-list').offset().top;
+//            console.log(newY)
+            if(newY < 0)
+            {
+                $('.go-back-wrap').removeClass('go-back-wrap-tran');
+            }
+            else
+            {
+                $('.go-back-wrap').addClass('go-back-wrap-tran');
+            }
+        });
+
+        $('#commentFabu').click(function(){
+            if(!$(this).hasClass('comment-fabu-dis'))
+            {
+//                $(this).addClass();
+                var commentContent = vm.commentCon;
+                var userid = sessionStorage.getItem('uuid');
+                var detailid = vm.newsDetai.uuid;
+                console.log(commentContent,userid,detailid)
+                var commentOneObj = {
+                    "contentUuid":detailid,
+                    "userUuid":userid,
+                    "commentContent":commentContent
+                }
+                vm.commentCon = '';
+                vm.btnFabutxt = '发布中.';
+
+                $.ajax({
+                    type:'post',
+                    dataType:'json',
+                    url:jb.apiurl+'content/commentInfo',
+                    data:commentOneObj,
+                    success:function(data){
+                        console.log('发表评论返回的数据：')
+                        console.log(data)
+                        if(data.code == 1)
+                        {
+//                            vm.commentList.unshift(commentOneObj);
+                            vm.btnFabutxt = '发布';
+//                            alert('发表成功');
+
+                            vm.newsDetai.commentList.content = [];
+                            mescroll.resetUpScroll( true );
+
+                            var titleHeight = $('.go-back-wrap').outerHeight();
+                            setTimeout(function(){$('.wrap').animate({scrollTop:poscomment-titleHeight},300);},100);
+                        }
+                        else
+                        {
+                            $.alert('未发布成功，请重新发表');
+                        }
+                    }
+                });
+            }
+        });
+
+        function getCommentData(pagenum,successCal,errorCal)
+        {
+            $.ajax({
+                url:jb.apiurl+'content/getCommentListByContentUuid',
+                type:"post",
+                dataType:"json",
+                global:false,
+                data:{contentUuid:vm.newsDetai.uuid,nextPage:pagenum,pageSize:10},
+                success:function(data){
+                    console.log(data)
+                    var serviceUrl = data.map.url;
+                    if(data.code == 1)
+                    {
+                        $.each(data.object.content,function(index,val){
+                            //如果不是第三方登录的图片
+//                            console.log(val)
+//                            console.log(val.icon)
+                            if(val.icon != null)
+                            {
+                                if(val.icon.indexOf('http') == -1 )
+                                {
+                                    val.icon = serviceUrl + val.icon;
+//                                    console.log(val.icon)
+                                }
+                            }
+                            else
+                            {
+                                val.icon = String(val.icon);
+                            }
+
+                        });
+
+                        vm.newsDetai.commentList.content = vm.newsDetai.commentList.content.concat(data.object.content);
+                        if(typeof successCal != 'undefined')
+                        {
+                            successCal({hasnext:!data.object.last,curnum:data.object.numberOfElements});
+                        }
+                    }
+                    else
+                    {
+                    }
+                },
+                error:function(){
+                    errorCal();
+                }
+            });
+        }
+
+
+
+        $('#login-btn-tip').click(function(){
+            location.href = '../userform/login.html?url='+encodeURIComponent(location.href);
+        });
+        
+        if(sessionStorage.getItem('login'))
+       {
+           $('#detail-loginBtn').hide();
+           $('#detail-comment').show();
+       }else{
+           $('#detail-loginBtn').show();
+           $('#detail-comment').hide();
+       }
+
+        $('body').off('click.goback').on('click.goback','.go-back',function(){
+//            history.back();
+//            location.href = document.referrer;
+            var comePage = pramas['url2'];
+            var backtoPage = '';
+            switch (comePage){
+                case 'comeindex':
+                    backtoPage = '../index/index.html';
+                    break;
+                case 'comesearch':
+                    backtoPage = '../search/search.html';
+                    break;
+                default:
+                    backtoPage = '../index/index.html';
+                    break;
+            }
+            location.href = backtoPage;
+        });
+        $('body').off('click.tosearch').on('click.tosearch','.to-search',function(){
+            location.href = '../search/search.html';
+        });
+    });
+</script>
+</html>
+
+
+

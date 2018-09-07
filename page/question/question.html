@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="x5-orientation" content="portrait">
+		<title>调查问卷</title>
+		<link rel="stylesheet" href="../../css/common/common.css" />
+		<script src="../../js/plugin/adapt/adapt.js"></script>
+	</head>
+	<body class="login-status">
+		<div class="wrap">
+			<div class="go-back-wrap go-back-wrap-title">
+				<div class="go-back"></div>
+				<div class="page-title">问卷调查</div>
+			</div>
+			<div class="container mt160 mb20" id="vmScope">
+				<ul id="wenjuanlist">
+					<li class="question-item" v-for="(item, index) in questions" v-cloak>
+						<div class="ques-con">
+							<span class="ques-title">{{index+1}}.{{item.category}}</span>
+						</div>
+						<div class="line-dashed-divide question-line-bianju"></div>
+						<div class="ques-con">
+							<div class="ques-tip">
+								请选择一个和自己最切合的答案，但要尽可能少选中性答案，以下
+							</div>
+							<ul class="answer-list">
+								<li class="answer-item" v-for="(rd, indexsub) in item.contentList">
+									<label class="answer-item-wrap">
+										<input type="radio" class="ques-radio" :checked="indexsub==0?true:false" :value="rd.value" :name="'xuanxiang'+index" id="" >
+										<span class="ques-radio-checked"></span>
+										{{rd.name}}
+									</label>
+								</li>
+							</ul>
+						</div>
+					</li>
+				</ul>
+				<div class="user-form-item mt60">
+					<button type="button" class="form-btn-common" id='submitWenjuan'>提交</button>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+	<script src="../../js/lib/vue.js"></script>
+	<script src="../../js/lib/underscore.js"></script>
+	<script src="../../js/lib/fastclick.js"></script>
+	<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+	<script src="../../js/common/common.js"></script>
+	<script>
+		$(function(){
+			if(sessionStorage.getItem('login') == null || sessionStorage.getItem('login') == 'null')
+			{
+				$.alert('请登录之后再查看问卷！',function(){
+					location.href = '../userform/login.html?url='+encodeURIComponent(location.href);
+				});
+			}
+			$('#checkimg').click(function(){
+
+			})
+
+
+			var vm = new Vue({
+				el:'#vmScope',
+				data:{
+					questions:[]
+				}
+			});
+
+			var pramas = jb.GetRequest();
+			var questionid = pramas['atid'];
+			var userid = sessionStorage.getItem('uuid');
+
+			$.ajax({
+				type:'post',
+				dataType:'json',
+				url:jb.apiurl+'question/getQuestion',
+				data:{uuid:questionid},
+				success:function(data) {
+					console.log(data)
+					if(data.code == 1)
+					{
+						vm.questions = data.object.content;
+						console.log(vm.questions)
+					}
+					else
+					{
+						$.alert(data.message);
+					}
+				}
+			});
+
+			$('#submitWenjuan').click(function(){
+				var selectedList = $('#wenjuanlist :checked').map(function(){
+					return $(this).val();
+				}).get().join();
+
+				$.ajax({
+					type:'post',
+					dataType:'json',
+					url:jb.apiurl+'question/submitAnswer',
+					data:{uuid:questionid,userUuid:userid,contentIds:selectedList},
+					success:function(data) {
+						console.log(data)
+						if(data.code == 1)
+						{
+							$.alert('提交成功',function(){
+								location.href = '../index/index.html';
+							});
+						}
+						else
+						{
+							$.alert(data.message);
+						}
+					}
+				});
+			});
+		});
+	</script>
+</html>

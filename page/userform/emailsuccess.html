@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <link rel="stylesheet" href="../../js/plugin/swiper/swiper.min.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body class="login-status">
+<div class="wrap">
+    <div class="go-back-wrap go-back-wrap-title">
+        <div class="go-back">
+        </div>
+        <div class="page-title">
+            找回密码
+        </div>
+    </div>
+    <div class="user-form-wrap mt160">
+        <div class="email-tip-wrap mt60">
+        </div>
+        <div class="form-txt-tip mt60">
+            修改链接已发送至你的注册邮箱，请查收
+        </div>
+        <div class="form-input-tip mt30">
+            若没有收到，请查看垃圾邮件或重新发送
+        </div>
+        <div class="user-form-item mt100">
+            <input type="button" class="form-btn-common form-btngray-common" id='but_id' value="重新发送">
+        </div>
+        <div class="user-form-item mt100">
+            <input type="button" class="form-btn-common" id='toindex' value="回到首页">
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/swiper/swiper.min.js"></script>
+<script src="../../js/plugin/iscroll/iscroll.js"></script>
+<script src="../../js/plugin/tab/jquery.tab.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+    $(function(){
+		 $('#but_id').on('click',function()
+		 {
+			 $.alert('邮件已重新发送至邮箱')
+		 })
+		 $('#toindex').on('click',function()
+		 {
+			 location.href = '../index/index.html';
+		 })
+
+    });
+</script>
+</html>
+
+
+

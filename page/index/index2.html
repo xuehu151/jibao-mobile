@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <link rel="stylesheet" href="../../js/plugin/swiper/swiper.min.css" />
+    <link rel="stylesheet" href="../../js/plugin/mscroll/mescroll.min.css" />
+    <style>
+
+    </style>
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body>
+<div class="mescroll wrap" id="content">
+    <div class="scrollWrap" id="scrollWrap">
+        <header class="index-banner-wrap">
+            <div class="banner-swipe sindex-banner-swipe swiper-container" id="swiper">
+                <ul class="index-banner swiper-wrapper">
+                    <li class="banner-wrap swiper-slide" v-for="banner in banners">
+
+                        <!--外链-->
+                        <a v-if="banner.linkType == 0" :href="banner.content">
+                            <div class="banner-pic-wrap">
+                                <img class="banner-pic" :src="banner.img" alt="">
+                            </div>
+                            <section class="banner-title-wrap" v-cloak>
+                                <p class="banner-title">
+                                    {{banner.title}}
+                                </p>
+                            </section>
+                        </a>
+                        <!--详情-->
+                        <a v-if="banner.linkType == 1" :href="'../newdetail/newdetail.html?url2=comeindex&atid='+banner.content">
+                            <div class="banner-pic-wrap">
+                                <img class="banner-pic" :src="banner.img" alt="">
+                            </div>
+                            <section class="banner-title-wrap" v-cloak>
+                                <p class="banner-title">
+                                    {{banner.title}}
+                                </p>
+                            </section>
+                        </a>
+                        <!--问卷-->
+                        <a v-if="banner.linkType == 2" :href="'../question/question.html?url=comeindex&atid='+banner.content">
+                            <div class="banner-pic-wrap">
+                                <img class="banner-pic" :src="banner.img" alt="">
+                            </div>
+                            <section class="banner-title-wrap" v-cloak>
+                                <p class="banner-title">
+                                    {{banner.title}}
+                                </p>
+                            </section>
+                        </a>
+                        <!--活动-->
+                        <a v-if="banner.linkType == 3" :href="'../activedetail/activedetail.html?url=comeindex&atid='+banner.content">
+                            <div class="banner-pic-wrap">
+                                <img class="banner-pic" :src="banner.img" alt="">
+                            </div>
+                            <section class="banner-title-wrap" v-cloak>
+                                <p class="banner-title">
+                                    {{banner.title}}
+                                </p>
+                            </section>
+                        </a>
+                    </li>
+                </ul>
+                <div class="swiper-pagination"></div>
+            </div>
+            <div class="sindex-top-wrap">
+                <div class="logo">
+                    <img src="../../img/logo2.png" alt="">
+                </div>
+                <div class="right-user-wrap clearfix">
+                    <div class="search-top" id="tosearch"></div>
+                    <div class="sindex-user-wrap">
+                        <div class="sindex-user" id="username"  style="display: none;">
+                            <div class="user-name">
+                                Burgess
+                            </div>
+                            <img id="user-pic" class="user-pic" :src="'../../img/demo/tx.jpg'" onerror="this.src='../../img/demo/default-tx.png'" alt="">
+                        </div>
+                        <div class="sindex-loginbtn-wrap" id="loginBtn">
+                            登录 / 注册
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+        <div v-if="bannerPos.length" v-cloak class="advert-wrap" id="activeItem">
+            <!--外链-->
+            <a v-if="bannerPos[0].linkType == 0"  class="advert-pic-wrap" :href="bannerPos[0].content">
+                <img :src="bannerPos[0].img" class="advert-pic" alt="广告位">
+            </a>
+            <!--详情-->
+            <a v-if="bannerPos[0].linkType == 1"  class="advert-pic-wrap" :href="'../newdetail/newdetail.html?url2=comeindex&atid='+bannerPos[0].content">
+                <img :src="bannerPos[0].img" class="advert-pic" alt="广告位">
+            </a>
+            <!--问卷-->
+            <a v-if="bannerPos[0].linkType == 2"  class="advert-pic-wrap" :href="'../question/question.html?url=comeindex&atid='+bannerPos[0].content">
+                <img :src="bannerPos[0].img" class="advert-pic" alt="广告位">
+            </a>
+            <!--活动-->
+            <a v-if="bannerPos[0].linkType == 3"  class="advert-pic-wrap" :href="'../activedetail/activedetail.html?url=comeindex&atid='+bannerPos[0].content">
+                <img :src="bannerPos[0].img" class="advert-pic" alt="广告位">
+            </a>
+            <div class="advert-pic-divide"></div>
+        </div>
+        <div class="nav-area sindex-nav-area">
+            <div class="nav-big" id="tuijianTab">
+                <div class="small-search-wrap">
+                    <input type="button" class="small-search tosearch">
+                </div>
+                <nav class="nav-wrap clearfix">
+                    <ul class="nav" v-cloak>
+                        <li class="nav-item">
+                            <a data-relval="" href="javascript:void(0)">
+                                <img src="../../img/newnew.png" class="nav-icon" alt="">
+                                <p class="nav-item-name">推荐</p>
+
+                            </a>
+                        </li>
+                        <li v-for="tabitem in tuijianArray" class="nav-item">
+                            <a :data-relval="tabitem.uuid" href="javascript:void(0)">
+                                <img :src="iconUrl+tabitem.icon" class="nav-icon" alt="">
+                                <p class="nav-item-name">{{tabitem.name}}</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="sindex-news">
+            <div class="container mt30" style="overflow: hidden;" id="container-new">
+                <div class="item-contip-wrap" id="item-contip-wrap">
+                    <div class="tab-item-contip" id="tab-item-contip">
+                        <div class="tip-item-name" id="tip-item-name"></div>
+                        <div class="tip-item-line"></div>
+                    </div>
+                </div>
+                <section class="news-list" v-if="tabData.length != 0">
+                    <ul class="news" id="newslist">
+                        <li v-for="dataitem in tabData" class="new-item">
+                            <div class="new-pic-wrap">
+                                <a class="new-pic-href" :href="'../newdetail/newdetail.html?url2=comeindex&atid='+dataitem.uuid">
+                                    <img class="new-pic" :src="dataitem.thumbnailImage" alt="">
+                                </a>
+                            </div>
+                            <section class="new-title-wrap">
+                                <a class="new-title" :href="'../newdetail/newdetail.html?url2=comeindex&atid='+dataitem.uuid">
+                                    {{dataitem.title}}
+                                </a>
+                                <p class="new-time">
+                                    {{dataitem.tagName}} / {{ dataitem.createTime.split(' ')[0] }}
+                                </p>
+                            </section>
+                        </li>
+                        <li class="nodata-tip" v-if="tabData.length == 0">
+                            暂无数据
+                        </li>
+                    </ul>
+                    <div class="line-solid-divide"></div>
+                    <!--<button id="pull-load" class="pull-load"><img src="../../img/ic_refresh.png" alt="">下拉加载更多</button>-->
+                </section>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+<script src="../../js/lib/jquery.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/swiper/swiper.min.js"></script>
+<script src="../../js/plugin/iscroll/iscroll.js"></script>
+<script src="../../js/plugin/mscroll/mescroll.min.js"></script>
+<script src="../../js/plugin/tab/jquery.tab2.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+
+    $(function(){
+
+        //        FastClick.attach(document.body);
+
+        /*vue数据模型*/
+        var bannerModel = new Vue({
+            el: '#swiper',
+            data: {
+                banners: []
+            }
+        });
+        var bannerPosModel = new Vue({
+            el: '#activeItem',
+            data: {
+                bannerPos:[]
+            }
+        });
+        var tuijianModel = new Vue({
+            el: '#tuijianTab',
+            data: {
+                tuijianArray:[],
+                iconUrl:''
+            }
+        });
+        var tuijianNewsModel = new Vue({
+            el: '#newslist',
+            data: {
+                activeTab:{thisRel:'',themeType:''},
+                tabData:[],
+                pageIndex:0,
+                pageSize:10
+            }
+        });
+
+
+        //      数据加载，dom形成之后再调用轮播图api
+        var mySwiper;
+        var tabScroll;
+        var initNavY = $('.index-banner-wrap').outerWidth()+$('#activeItem').outerWidth();
+        var scrolltop = 0;
+        var hasFixNav = false;
+        var navFixHeight = $('.nav').height();
+
+        var navHeight = $('.sindex-nav-area').height();
+
+        //广告
+        $.ajax({
+            url:jb.apiurl+'ad/getAll',
+            type:'post',
+            dataType:'json',
+            success:function(data){
+                //                console.log(data)
+                if(data.code === 1)
+                {
+                    var url = data.map.url;
+                    var dataArr = data.object;
+                    $.each(dataArr,function(index,val){
+                        val.img = url + val.img;
+                    });
+
+                    bannerPosModel.bannerPos = _.where(dataArr, {type: 0});
+                    bannerModel.banners = _.filter(dataArr, function(val){ return val.type != 0; });
+
+                    bannerModel.$nextTick(function(){
+                        mySwiper = new Swiper ('.swiper-container', {
+                            autoplay:{
+                                disableOnInteraction: false,
+                                delay: 3000
+                            },
+                            loop: true,
+                            pagination: {
+                                el:'.swiper-pagination',
+                                clickable:true
+                            }
+                        });
+
+                    });
+
+                }
+                else
+                {
+                    $.alert(data.message);
+                }
+            }
+        });
+
+        if(sessionStorage.getItem('icon') == null)
+        {
+            sessionStorage.setItem('icon','../../img/demo/default-tx.png');
+        }
+
+        $('.wrap').on('scroll',function(){
+            if($('.nav-big-fixed').length == 0)
+            {
+                /*  var leftWidth = $('.nav-item-active').position().left+parseInt($('.nav-item-active').css('marginLeft'));
+                 var firstLeftWidth = $('.nav').find('li:first-child').position().left;
+                 var moveX = leftWidth - firstLeftWidth;
+                 tabScroll.scrollTo(-moveX,0,0);*/
+
+                var wwidth = $(window).width();
+                var navWidth = $('.nav').outerWidth();
+                var totalNavItemLength = $('.nav .nav-item').length;
+                var itemLeftWidth = $('.nav-item-active').offset().left+parseInt($('.nav-item-active').css('paddingLeft'));
+                var objWidth = $('.nav-item-active a').outerWidth();
+
+                if(totalNavItemLength>5)
+                {
+                    var curIndex = $('.nav-item-active').index()+1;
+                    if(curIndex>3&&totalNavItemLength - curIndex>2)
+                    {
+                        console.log(1,itemLeftWidth-wwidth/2)
+                        tabScroll.scrollBy(-(itemLeftWidth-wwidth/2+objWidth/2),0,0);
+                    }
+                    else if(totalNavItemLength - curIndex<=2)
+                    {
+                        console.log(2,navWidth-wwidth)
+                        tabScroll.scrollTo(-(navWidth-wwidth),0,0);
+                    }
+                    else
+                    {
+                        console.log(3,0)
+                        tabScroll.scrollTo(0,0,0);
+                    }
+                }
+            }
+            //            var newY = $('.nav-area').offset().top+$('.nav-area').height();
+            var newY = $('.nav-area').offset().top;
+            var navDuibi = 2*parseInt($('html').css('fontSize'));
+            if(newY <= -navDuibi)
+            {
+                $('.nav-big').addClass('nav-big-fixed');
+                $('#item-contip-wrap').show();
+                //                $('.sindex-nav-area').height(0);
+                navFixHeight = $('.nav').height();
+            }
+            else
+            {
+                $('.nav-big').removeClass('nav-big-fixed');
+                $('#item-contip-wrap').hide();
+                //                $('.sindex-nav-area').height(navHeight);
+            }
+            tabScroll.refresh();
+
+            //            $.tabMarkerPosRefresh($('.nav-item-active a'),$('.nav'));
+        });
+
+        //进入活动详情
+        $('#activeItem').click(function(){
+            location.href = '../activedetail/activedetail.html';
+        });
+
+        $('.tosearch,#tosearch').click(function(){
+            location.href = '../search/search.html';
+        });
+
+        $('.login-btn,#loginBtn').click(function(){
+            location.href = '../userform/login.html?url='+encodeURIComponent(location.href);
+        });
+
+        $('#username').click(function(){
+            location.href = '../user/user.html';
+        });
+
+        if (sessionStorage.getItem('login')) {
+            $('#loginBtn').hide();
+            $('#username').show();
+
+            var nickName = sessionStorage.getItem('nickName');
+            $('.user-name').text(nickName);
+
+            var userIcon = sessionStorage.getItem('icon');
+            //            alert(userIcon)
+            $('#user-pic').attr('src',userIcon);
+        }
+        else {
+            //     		alert('logoout');
+            $('#loginBtn').show();
+            $('#username').hide();
+        }
+
+
+        function getTabData(pagenum,successCal,errorCal)
+        {
+            //            alert(typeof tuijianNewsModel.thisRel)
+            //调用loading提示
+            $.ajax({
+                url:jb.apiurl+'content/getContentListByThemeUuid',
+                type:"post",
+                dataType:"json",
+                //                global:false,
+                data:{themeUuid:tuijianNewsModel.thisRel,nextPage:pagenum,pageSize:tuijianNewsModel.pageSize},
+                success:function(data){
+                    //                    console.log(data)
+                    var serviceUrl = data.map.url;
+
+                    if(data.code == 1)
+                    {
+                        var datas = data.object.content;
+
+                        //                        console.log(datas)
+                        $.each(datas,function(key,val){
+                            //已有，不需要这样处理了
+                            //                            val.themeType = tuijianNewsModel.themeType;
+                            val.thumbnailImage = serviceUrl+val.thumbnailImage;
+                        });
+
+                        //                        console.log(datas)
+                        //给tuijianNewsModel赋值
+                        var tabsDataArr = $.extend([],tuijianNewsModel.tabData);
+                        tuijianNewsModel.tabData = tabsDataArr.concat(datas);
+
+                        //                        console.log(tuijianNewsModel.tabData);
+                        if(tuijianNewsModel.pageIndex == 0)
+                        {
+                            tuijianNewsModel.$nextTick(function(){
+                                if(hasFixNav)
+                                {
+                                    //                                    alert($('.nav').height())
+                                    console.log(parseInt($('#container-new').css('marginTop')))
+
+                                    //                                    initNavY = $('.index-banner-wrap').outerHeight(true)+$('#activeItem').outerHeight(true)+$('.nav-area').outerHeight()-$('.nav').outerHeight()+parseInt($('#tab-item-contip').css('marginTop'));
+                                    initNavY = $('.index-banner-wrap').outerHeight(true)+$('#activeItem').outerHeight(true)+$('.nav-area').outerHeight()-navFixHeight+10;
+                                    //                                    alert(parseInt($('#tab-item-contip').css('marginTop')))
+                                    //                                    console.log(initNavY)
+                                    //                                    alert(initNavY)
+                                    $('#content').scrollTop(initNavY);
+                                }
+                                else
+                                {
+                                    $('#content').scrollTop(scrolltop);
+                                }
+                                //                                $('.news-list').css('height','auto');
+
+                                setTimeout(function(){
+
+                                    $('.wrap').trigger('scroll');
+                                    $('.news-list').css('height','auto');
+                                },300);
+                            });
+                        }
+
+                        tuijianNewsModel.pageIndex++;
+                        if(typeof successCal != 'undefined')
+                        {
+                            //                            alert(data.object.last)
+                            successCal({hasnext:!data.object.last,curnum:data.object.numberOfElements});
+                        }
+                    }
+                    else
+                    {
+                        //                        console.log(data);
+                    }
+
+                    //去掉loading
+
+                },
+                error:function(){
+                    errorCal();
+                }
+            });
+        }
+
+        $.ajax({
+            url:jb.apiurl+'content/getAllTheme',
+            type:"post",
+            dataType:"json",
+            success:function(data){
+                var picurl = data.map.url;
+                tuijianModel.iconUrl = picurl;
+                //                console.log(data)
+                if(data.code == 1)
+                {
+                    tuijianModel.tuijianArray = data.object;
+                    tuijianModel.$nextTick(function(){
+
+                        tabScroll = new IScroll('.nav-wrap', {
+                            mouseWheel: false,
+                            scrollbars:false ,
+                            bounce:false,
+                            click:true,
+                            tap:true,
+                            scrollX:true,
+                            scrollY:false,
+                            eventPassthrough:true
+                        });
+
+                        $('.nav').tabs({
+                            callFun:function(clickObj,navObj){
+                                $('.index-banner-wrap,#activeItem').css('pointer-events','none')
+
+                                scrolltop = $('#content').scrollTop();
+                                if($('.nav-big-fixed').length == 1)
+                                {
+                                    hasFixNav = true;
+                                }
+                                else
+                                {
+                                    hasFixNav = false;
+                                }
+
+                                tuijianNewsModel.thisRel = $(clickObj).data('relval');
+                                //                                alert(typeof $(clickObj).data('relval'))
+                                tuijianNewsModel.themeType = $.trim($(clickObj).text());
+
+                                $('#tip-item-name').text($.trim($(clickObj).text()));
+
+                                /*var leftWidth = $(clickObj).closest('li').position().left+parseInt($(clickObj).closest('li').css('marginLeft'));
+                                 //                                var leftWidth = $(clickObj).closest('li').offset().left;
+                                 var objWidth = $(clickObj).outerWidth();*/
+                                //                                var firstLeftWidth = $(navObj).find('li:first-child').position().left;
+                                //                                console.log(firstLeftWidth)
+                                //                                var moveX = leftWidth - firstLeftWidth;
+                                //                                console.log(moveX)
+                                //                                alert(moveX)
+
+                                //                                var wwidth = $(window).width();
+                                //                                var navWidth = $('.nav').width();
+
+                                /* console.log('////////////////')
+                                 console.log(leftWidth)
+                                 console.log(wwidth)
+                                 console.log(objWidth)
+                                 console.log(tabScroll.x)
+                                 var moveX = leftWidth - wwidth/2 - objWidth/2+tabScroll.x;
+
+                                 console.log(moveX)
+                                 if(!hasFixNav)
+                                 {
+                                 tabScroll.scrollBy(-moveX,0,300);
+                                 }*/
+
+                                var wwidth = $(window).width();
+                                var navWidth = $('.nav').outerWidth();
+                                var totalNavItemLength = $('.nav .nav-item').length;
+                                var itemLeftWidth = $(clickObj).closest('li').offset().left+parseInt($(clickObj).closest('li').css('paddingLeft'));
+                                var objWidth = $(clickObj).outerWidth();
+
+                                if(totalNavItemLength>5&&!hasFixNav)
+                                {
+                                    var curIndex = $(clickObj).closest('li').index()+1;
+                                    if(curIndex>3&&totalNavItemLength - curIndex>2)
+                                    {
+                                        console.log(1,itemLeftWidth-wwidth/2)
+                                        tabScroll.scrollBy(-(itemLeftWidth-wwidth/2+objWidth/2),0,300);
+                                    }
+                                    else if(totalNavItemLength - curIndex<=2)
+                                    {
+                                        console.log(2,navWidth-wwidth)
+                                        tabScroll.scrollTo(-(navWidth-wwidth),0,300);
+                                    }
+                                    else
+                                    {
+                                        console.log(3,0)
+                                        tabScroll.scrollTo(0,0,300);
+                                    }
+                                }
+
+                                tuijianNewsModel.pageIndex = 0;
+                                tuijianNewsModel.tabData = [];
+
+                                $('.news-list').height(20000);
+
+                                //                                mescroll.setPageNum(1);
+                                mescroll.resetUpScroll( false );
+
+                                //                                getTabData(tuijianNewsModel.pageIndex);
+                                setTimeout(function(){
+                                    $('.index-banner-wrap,#activeItem').css('pointer-events','auto');
+                                },500);
+                            }
+                        });
+                    });
+                }
+                else
+                {
+                    //                    alert(data.code);
+                }
+            }
+        });
+
+        $('body .wrap').height($(window).height());
+
+        var mescroll = new MeScroll("content", {
+            down: {
+                //                                use:false,
+                isLock:true,
+                auto: false
+            },
+            up: {
+                auto: false,
+                isBounce: false,
+                //                offset:-100*jb.huansuanPx,
+                noMoreSize:1,
+                offset:10,
+                page:{
+                    num : 0 ,
+                    size : 10,
+                    time : null
+                },
+                htmlLoading:'<p class="upwarp-progress mescroll-rotate"></p><p class="upwarp-tip">加载中...</p>',
+                htmlNodata:'<p class="upwarp-nodata">没有更多了</p>',
+                callback: function(page){
+                    var pageNext = page.num - 1;
+                    function scal(pageStaus){
+                        mescroll.endSuccess(pageStaus.curnum,pageStaus.hasnext);
+                        //                        pageStaus.hasnext?$('#pull-load').show():$('#pull-load').hide();
+
+                    }
+                    //                    getTabData(tuijianNewsModel.pageIndex,scal);
+                    //                    $('#pull-load').hide();
+                    getTabData(pageNext,scal);
+                }
+            }
+        });
+
+    });
+</script>
+</html>

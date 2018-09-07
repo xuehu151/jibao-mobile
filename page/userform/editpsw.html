@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <link rel="stylesheet" href="../../css/common/common.css" />
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body class="login-status">
+    <div class="wrap">
+        <div class="go-back-wrap go-back-wrap-title">
+            <div class="go-back">
+            </div>
+            <div class="page-title">
+                修改密码
+            </div>
+        </div>
+        <div class="user-form-wrap mt160" id='form_input'>
+            <div class="user-input-wrap mt40">
+                <input type="password" placeholder="请输入您的密码" v-model="formData.newpassword" class="user-form-input newpassword_psw">
+            </div>
+            <div class="user-input-wrap mt40">
+                <input type="password" placeholder="请再次输入您的密码" v-model="formData.usedpassword" class="user-form-input usedpassword_psw">
+            </div>
+            <div class="user-form-item mt60">
+                <input type="button" class="form-btn-common on_complete" value="完成">
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+    $(function(){
+			var vm=new Vue({
+				el:'#form_input',
+				data:{
+					formData:{
+						'newpassword':'',
+						'usedpassword':''
+					}
+                },
+                 methods:{
+                     details:function(){
+//							 alert('adadad11111')
+                         return 12;
+                     }
+                 }
+            });
+					
+       $('.on_complete').on('click',function()
+	   {
+//	   		var firstPwd = $.trim(vm.formData.newpassword);
+//	   		var secendPwd = $.trim(vm.formData.usedpassword);
+	   		
+	   		var firstPwd = vm.formData.newpassword;
+	   		var secendPwd = vm.formData.usedpassword;
+
+			 if(firstPwd==""){
+				 $.alert("请输入密码")
+			 }else if(secendPwd==""){
+				 $.alert("请输入确认密码")
+			 }else if(firstPwd !== secendPwd){
+			 	$.alert("两次密码不一致")
+			 }else{
+			 	
+			 	if (firstPwd.length < 6 ||firstPwd.length > 20 ) {
+                		$.alert("密码长度为6-20位")
+                		return;
+                }
+           	 	var pattern = new RegExp("[ ]");
+            		var result = firstPwd.match(pattern);  
+                if (!result)  
+                {  
+					var pramas = jb.GetRequest();
+        				var uuid = pramas['uuid'];
+			 		var dataParm = {
+			 			uuid:uuid,
+			 			pw:secendPwd
+			 		}
+			 	changePassWordRequest(dataParm);
+                }else{  
+                    $.alert("密码不能含有空格")
+//                  $('.newpassword_psw').val('');
+//                  $('.usedpassword_psw').val('');
+                    vm.formData.newpassword = '';
+                    vm.formData.usedpassword = '';
+                    return;
+                }  
+			 }
+		   
+	   });
+	  
+	   
+	   function changePassWordRequest(dataParm){
+	   	 $.ajax({
+	   	 	type:"post",
+	   	 	url:jb.apiurl + "user/changePWD",
+	   	 	data:dataParm,
+	   	 	dataType:"json",
+	   	 	success:function(data){
+	   	 		console.log(data);
+	   	 		var code = data.code;
+	   	 		var message = data.message;
+	   	 		if (code == 1) {
+	   	 			$.alert('恭喜修改成功！');
+                    window.location.href='../index/index.html'
+	   	 		} else{
+	   	 			$.alert(message);
+	   	 		}
+	   	 	}
+	   	 });
+	   }
+       
+       
+	   
+    });
+</script>
+</html>
+
+
+

@@ -1,0 +1,26 @@
+
+.ques-title {
+	display: block;
+  	font-family: PingFangSC-Regular;
+  	font-size: 2.666666667rem;
+  	color: #000000;
+  	line-height: 3.75rem;
+  	padding: 0.83rem 0.83rem;
+}
+
+.ques-tip{
+	font-family: PingFangSC-Regular;
+	font-size: 2.33333333rem;
+ 	color: #8C8C8C;
+	line-height: 3.33333333rem;
+	padding: 0.83rem 0.83rem;
+}
+
+.answer-item{
+	height: 50px;
+	width: 90%;
+	font-family: PingFangSC-Regular;
+	font-size: 2.33333333rem;
+	line-height:50px;
+	margin: 3rem 0.83rem;
+}

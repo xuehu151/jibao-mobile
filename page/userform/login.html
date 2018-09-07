@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="x5-orientation" content="portrait">
+    <title>思创吉宝</title>
+    <!-- <script src="http://tjs.sjs.sinajs.cn/open/api/js/wb.js?appkey=2121961755&debug=true" type="text/javascript" charset="utf-8"></script> -->
+    <link rel="stylesheet" href="../../css/common/common.css"/>
+    <link rel="stylesheet" href="../../js/plugin/swiper/swiper.min.css"/>
+    <script src="../../js/plugin/adapt/adapt.js"></script>
+</head>
+<body class="login-status">
+<div class="wrap">
+    <div class="go-back-wrap go-back-wrap-title">
+        <div class="go-back" id="go_back_id">
+        </div>
+        <div class="page-title">
+            登录吉宝账号
+        </div>
+    </div>
+    <div id="loginForm" class="user-form-wrap mt160">
+        <div class="user-input-wrap mt40">
+            <input type="text" placeholder="请输入手机号/邮箱" autocomplete="off" v-model="formData.phone" class="user-form-input phone">
+        </div>
+        <div class="user-input-wrap mt40">
+            <input type="password" placeholder="请输入密码" autocomplete="off" v-model="formData.psw" class="user-form-input password">
+        </div>
+        <div class="user-form-item mt60">
+            <button type="button" class="form-btn-common" id='login_id' value="登录">登录</button>
+        </div>
+        <div class="form-txt-twobtn-wrap mt60">
+            <a class="form-txt-btn" id="newpassword_id">
+                忘记密码
+            </a>
+            <a class="form-txt-btn" id="phoneregister_id">
+                新用户注册
+            </a>
+        </div>
+    </div>
+    <div class="disanfang-login-wrap">
+        <div class="container">
+            <div class="line-dashed-divide">
+            </div>
+            <div class="disanfang-login-txt">
+                <div class="disanfang-login-center">
+                    第三方账号登录
+                </div>
+            </div>
+            <div class="disanfang-pic-wrap">
+                <div class="disanfang-pic-item" id='weibo_id'>
+                    <input type="button" id="weiboLogin" class="disanfang-btn" value="">
+                    <img src="../../img/ic_weibo.png" class="disanfang-pic"/>
+                    <p class="disanfang-txt">
+                        微博
+                    </p>
+                </div>
+                <div class="disanfang-pic-item" id='qq_id'>
+                    <img src="../../img/ic_qq.png" class="disanfang-pic"/>
+                    <p class="disanfang-txt">
+                        QQ
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="../../js/lib/jquery-3.3.1.min.js"></script>
+<script src="../../js/lib/vue.min.js"></script>
+<script src="../../js/lib/underscore.js"></script>
+<script src="../../js/lib/fastclick.js"></script>
+<script src="../../js/plugin/swiper/swiper.min.js"></script>
+<script src="../../js/plugin/iscroll/iscroll.js"></script>
+<script src="../../js/plugin/tab/jquery.tab.js"></script>
+<script src="../../js/plugin/dialog/jquery.dialog.js"></script>
+<script src="../../js/common/common.js"></script>
+<script>
+    $(function () {
+        var pramas = jb.GetRequest();
+        var reponsecode = pramas[ 'code' ];
+        if ( typeof reponsecode != 'undefined' ) {
+
+            console.info('pramas',pramas);
+            console.info('reponsecode',reponsecode);
+//            $.showLoading();
+            /*
+             *传这些参数
+             * */
+            var code = reponsecode;
+            var client_id = jb.loginWbKey;
+            var client_secret = jb.loginWbSecret;
+            var grant_type = 'authorization_code';
+            var redirect_uri = jb.loginWbReUri;
+
+            $.ajax({
+                type : 'post',
+                dataType : 'json',
+                url : jb.apiurl + 'weiboLogin',
+                data : { client_id : client_id, client_secret : client_secret, code : code, redirect_uri : redirect_uri },
+                success : function ( data ) {
+                    console.log(data)
+                    sessionStorage.setItem('nickName', data.object.nickName);
+                    sessionStorage.setItem('icon', data.object.icon);
+                    sessionStorage.setItem('uuid', data.object.uuid);
+                    sessionStorage.setItem('searchHistory', data.object.searchHistory);
+                    sessionStorage.setItem('login', true);
+                    if ( data.object.mobile == null ) {
+                        sessionStorage.setItem('mobile', '');
+                    }
+                    else {
+                        sessionStorage.setItem('mobile', data.object.mobile);
+                    }
+
+                    if ( data.object.email == null ) {
+                        sessionStorage.setItem('email', '');
+                    }
+                    else {
+                        sessionStorage.setItem('email', data.object.email);
+                    }
+                    $.hideLoading();
+
+                    location.href = '../index/index.html';
+                }
+            });
+
+        }
+
+        /*WB2.login(function() {
+         alert(3)
+         //callback function
+         });
+         WB2.anyWhere(function (W) {
+         W.widget.connectButton({
+         id: "weiboLogin",
+         type: '3,2',
+         callback: {
+         login: function (o) { //登录后的回调函数
+         console.log(o);
+         //                        thirdparty(null,null,o.avatar_hd, o.name ,3, o.id);//个人方法
+
+         alert(1)
+         try{
+         //                            document.getElementsByClassName('loginout')[0].click();
+         //页面需求，当前页面登录完成之后，不进行跳转，所以模拟点击事件，让微博账号在当前域中退出。不影响下次登录。（元素为微博动态添加）
+         //微博没有提供退出方法。下面的logout为另一种开发模式调用。
+
+         }catch(e){
+         //                            console.log(e);
+         }
+         },
+         logout: function () { //退出后的回调函数
+         alert(2)
+         }
+         }
+         });
+         });*/
+
+        $('#weiboLogin').click(function () {
+            //            alert(jb.loginWbKey)
+            location.href = 'https://open.weibo.cn/oauth2/authorize?client_id=' + jb.loginWbKey + '&redirect_uri=' + jb.loginWbUri + '&response_type=code&display=mobile'
+        })
+
+        var vm = new Vue({
+            el : '#loginForm',
+            data : {
+                formData : {
+                    'phone' : '',
+                    'psw' : ''
+                }
+            }
+        });
+        var url = pramas[ 'url' ];
+
+        $('#login_id').on('click', function () {
+
+            if ( $.trim(vm.formData.phone) == "" ) {
+                $.alert('请输入账号')
+            }
+            else if ( $.trim(vm.formData.psw) == "" ) {
+                $.alert('请输入密码')
+            }
+            else {
+                var phone = $.trim(vm.formData.phone);
+                var passwd = $.trim(vm.formData.psw);
+                //              sessionStorage.setItem('phone',phone);
+                //              sessionStorage.setItem('username','Keppel');
+                //              sessionStorage.setItem('login',true);
+
+                var dataParm = {
+                    registerId : phone,
+                    passwd : passwd
+                }
+                loginRequest(dataParm);
+                //                history.back(-1);
+
+            }
+        });
+
+        $('body').off('click.goback').on('click.goback', '.go-back', function () {
+            if ( !!url ) {
+                location.href = url;
+            }
+            else {
+                location.href = '../index/index.html';
+            }
+        });
+
+        $('#newpassword_id').on('click', function () {
+            window.location.href = 'phonepsw.html'
+        });
+        $('#phoneregister_id').on('click', function () {
+            window.location.href = 'phoneregister.html'
+        });
+
+        /*$('#weiboLogin').on('click', function () {
+         alert('开发中')
+         });*/
+        $('#qq_id').on('click', function () {
+            $.alert('开发中');
+        });
+
+        $('body').height($(window).height());
+
+        //用户登录
+        function loginRequest ( dataParm ) {
+            $.ajax({
+                url : jb.apiurl + 'login',
+                type : 'post',
+                dataType : 'json',
+                data : dataParm,
+                success : function ( data ) {
+                    console.log(data);
+                    var code = data.code;
+                    var message = data.message;
+                    if ( code == 1 ) {
+                        var nickName = data.object.nickName;
+                        if ( nickName == null ) {
+                            nickName = 'Keppel';
+                        }
+                        sessionStorage.setItem('nickName', nickName);
+
+                        var userIcon = data.object.icon;
+
+                        if ( userIcon == null ) {
+                            userIcon = '../../img/demo/default-tx.png';
+                        }
+                        else {
+                            //如果是第三方登录的图片
+                            if ( userIcon != null ) {
+                                if ( userIcon.indexOf('http') == -1 ) {
+                                    userIcon = data.map.url + userIcon;
+                                }
+                            }
+                        }
+                        //                            alert(userIcon)
+                        sessionStorage.setItem('icon', userIcon);
+                        sessionStorage.setItem('uuid', data.object.uuid);
+                        sessionStorage.setItem('searchHistory', data.object.searchHistory);
+                        sessionStorage.setItem('login', true);
+                        sessionStorage.setItem('mobile', data.object.mobile);
+                        if ( data.object.mobile == null ) {
+                            sessionStorage.setItem('mobile', '');
+                        }
+                        sessionStorage.setItem('email', data.object.email);
+                        if ( data.object.email == null ) {
+                            sessionStorage.setItem('email', '');
+                        }
+                        if ( !!url ) {
+                            location.href = url;
+                        }
+                        else {
+                            location.href = '../index/index.html';
+                        }
+                    }
+                    else {
+                        $.alert(message);
+                    }
+                }
+            });
+        }
+    });
+
+</script>
+</html>
+
+
+
